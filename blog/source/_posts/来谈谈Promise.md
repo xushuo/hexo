@@ -6,7 +6,6 @@ tags:
     - nodejs
     - es6
 categories: es6
-description: 简单了解下Promise
 
 ---
 
@@ -22,15 +21,15 @@ Promise——异步编程解决方案
 Promise的登场
 -------------
 
-####promise是什么呢？
+### promise是什么呢？
 
 因为ES6发布了，promise被列为正式规范，主流浏览器对ES6也是极大的支持，所以我们先在chrome浏览器中看下这个宝贝啥东东。
 ![](/images/promise.png)
 promise对象是一个构造函数，拥有all、race、reject以及resolve方法。new的新对象有catch和then方法。
-####promise的状态
+#### promise的状态
 
 promise三种状态：未完成(pending),已完成(fulfilled),失败(rejected).状态之前之间不可逆转。
-####promise的用法
+#### promise的用法
 
     var promise = new Promise(function(resolve, reject) {  
 	    if (/* 异步操作成功 */){    
