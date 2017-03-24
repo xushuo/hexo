@@ -212,3 +212,92 @@ item in items  语法渲染  也可以用  item of items
     <p v-for="(val, key , index) in object">{{ index+" : "+key+" - "+val }}</p>
 * v-for支持取整数
 `<span v-for="n in 10">{{ n }}</span>`
+
+### 数组变更检测
+* 以下两种情况，vue不能检测变动而的数组
+1.当你利用索引直接设置一个项时，例如： `vm.items[indexOfItem] = newValue`
+2.当你修改数组的长度时，例如： `vm.items.length = newLength`
+解决办法：
+
+
+    1： Vue.set(example1.items, indexOfItem, newValue)
+        example1.items.splice(indexOfItem, 1, newValue)
+    2： example1.items.splice(newLength)
+    
+时间处理器
+-----
+### 监听事件 
+v-on监听
+也可以直接用vue的实例调用。
+    
+    var vm = new Vue({
+        method:{
+             hello(){
+             }
+        }
+    })；
+    vm.hello();
+表单控件绑定
+-------
+### v-model
+v-model 可以绑定文本值
+checkbox：`<input type="checkbox" id="checkbox" v-model="checked">`
+radio： `<input type="radio" id="one" value="One" v-model="picked">`
+select： `<select v-model="selected">`
+v-model绑定的是标签的value
+还可以更改绑定耳朵value。 v-bind
+`<input  type="checkbox"  v-model="toggle"  v-bind:true-value="a"  v-bind:false-value="b" >`
+`<input type="radio" v-model="pick" v-bind:value="a">`
+过滤收尾空格： `<input v-model.trim="msg">`
+
+组件 component
+-------
+### 注册
+命名尽量遵守W3C规则(小写并包含一个短杠)
+    
+    #注册全局组件
+    Vue.component(''my-componetn',{
+        template: '<div>hello</div>'
+    });
+    #局部注册
+    new Vue({
+      components:{
+        'my-btn': {
+            data(){
+               return {
+                 id: 10
+               }
+             }, 
+            template: '<button v-on:click="id++">{{ id }}</button>'
+          }
+      }
+    })
+### 组件传递数据
+1. prop
+子组件用 props 声明所需的**字符串**   
+   
+    
+    Vue.component('child', {
+      // 声明 props
+      props: ['message'],
+      // 就像 data 一样，prop 可以用在模板内
+      // 同样也可以在 vm 实例中像 “this.message” 这样使用
+      template: '<span>{{ message }}</span>'
+    })
+    #传值 
+    <child message="hello!"></child>       
+* HTML 特性是不区分大小写的。所以，当使用的不是字符串模版，camelCased (驼峰式) 命名的 prop 需要转换为相对应的 kebab-case (短横线隔开式) 命名
+
+
+    Vue.component('child', {
+      // camelCase in JavaScript
+      props: ['myMessage'],
+      template: '<span>{{ myMessage }}</span>'
+    })
+    <!-- kebab-case in HTML -->
+    <child my-message="hello!"></child>
+* 如果需要动态传值，绑定父子关系，则用 v-bind:my-mysssage 。
+   
+    
+    
+    
