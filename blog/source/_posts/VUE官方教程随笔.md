@@ -115,7 +115,7 @@ CLass与Style的绑定
  ---------------
  
  ### 绑定html class
- 1. class   v-bind   
+ #### class   v-bind   
 `  <div v-bind:class="{ active: isActive }"></div>`
  class ’active‘ 的更新取决于 isActive的 true or false
   多个class用 逗号 ,  分隔
@@ -145,7 +145,7 @@ CLass与Style的绑定
       渲染为:
       <div class="active text-danger"></div>    
  
- 2. style v-bind
+#### style v-bind
  
  
      <div v-bind:style="{ color: activeColor, fontSize: fontSize + 'px' }"></div>
@@ -273,7 +273,7 @@ v-model绑定的是标签的value
       }
     })
 ### 组件传递数据
-1. prop
+####  prop
 子组件用 props 声明所需的**字符串**   
    
     
@@ -286,8 +286,10 @@ v-model绑定的是标签的value
     })
     #传值 
     <child message="hello!"></child>       
-* HTML 特性是不区分大小写的。所以，当使用的不是字符串模版，camelCased (驼峰式) 命名的 prop 需要转换为相对应的 kebab-case (短横线隔开式) 命名
 
+> **Note:**
+
+> - HTML 特性是不区分大小写的。所以，当使用的不是字符串模版，camelCased (驼峰式) 命名的 prop 需要转换为相对应的 kebab-case (短横线隔开式) 命名
 
     Vue.component('child', {
       // camelCase in JavaScript
@@ -296,8 +298,190 @@ v-model绑定的是标签的value
     })
     <!-- kebab-case in HTML -->
     <child my-message="hello!"></child>
-* 如果需要动态传值，绑定父子关系，则用 v-bind:my-mysssage 。
-   
+* 如果需要动态传值，绑定父子关系 **单项绑定**，则用 v-bind:my-mysssage 。
+* 子组件不应该在内部改变prop。
+    
+    
+    ① ： 定义一个局部变量，并用 prop 的值初始化它：
+    props: ['initialCounter'],
+    data: function () {
+      return { counter: this.initialCounter }
+    }
+    ② ： 定义一个计算属性，处理 prop 的值并返回。
+    props: ['size'],
+    computed: {
+      normalizedSize: function () {
+        return this.size.trim().toLowerCase()
+      }
+    }
+> **Tip:** 注意在 JavaScript 中对象和数组是引用类型，指向同一个内存空间，如果 prop 是一个对象或数组，在子组件内部改变它会影响父组件的状态。
+
+#### 自定义事件
+   vue的事件接口
+   * $on(eventName) 监听事件
+   * $emit(eventName) 触发事件
+
+
+    <div id="counter-event-example">
+      <p>{{ total }}</p>
+      <button-counter v-on:increment="incrementTotal"></button-counter>
+      <button-counter v-on:increment="incrementTotal"></button-counter>
+    </div>
+    Vue.component('button-counter', {
+      template: '<button v-on:click="increment">{{ counter }}</button>',
+      data: function () {
+        return {
+          counter: 0
+        }
+      },
+      methods: {
+        increment: function () {
+          this.counter += 1
+          this.$emit('increment')
+        }
+      },
+    })
+    new Vue({
+      el: '#counter-event-example',
+      data: {
+        total: 0
+      },
+      methods: {
+        incrementTotal: function () {
+          this.total += 1
+        }
+      }
+    })
+#### 非父子组件间通信
+* 如果简单情况下，可以使用一个空的Vue实例作为中央事件总线
+    
+    
+    var bus = new Vue()
+    // 触发组件 A 中的事件
+    bus.$emit('id-selected', 1)
+    // 在组件 B 创建的钩子中监听事件
+    bus.$on('id-selected', function (id) {
+      // ...
+    })
+#### 使用slot分发内容
+##### 单个slot
+除非子组件模板包含至少一个 <slot> 插口，否则父组件的内容将会被丢弃。当子组件模板只有一个没有属性的 slot 时，父组件整个内容片段将插入到 slot 所在的 DOM 位置，并替换掉 slot 标签本身。
+    
+    假定 my-component 组件有下面模板：
+    <div>
+      <h2>我是子组件的标题</h2>
+      <slot>
+        只有在没有要分发的内容时才会显示。
+      </slot>
+    </div>
+    父组件模版：
+    <div>
+      <h1>我是父组件的标题</h1>
+      <my-component>
+        <p>这是一些初始内容</p>
+        <p>这是更多的初始内容</p>
+      </my-component>
+    </div>
+    渲染结果：
+    <div>
+      <h1>我是父组件的标题</h1>
+      <div>
+        <h2>我是子组件的标题</h2>
+        <p>这是一些初始内容</p>
+        <p>这是更多的初始内容</p>
+      </div>
+    </div>
+##### 具名slot    
+<slot> 元素可以用一个特殊的属性 name 来配置如何分发内容。多个 slot 可以有不同的名字。具名 slot 将匹配内容片段中有对应 slot 特性的元素。
+仍然可以有一个匿名 slot ，它是默认 slot ，作为找不到匹配的内容片段的备用插槽。如果没有默认的 slot ，这些找不到匹配的内容片段将被抛弃。
+    
+    例如，假定我们有一个 app-layout 组件，它的模板为：
+    <div class="container">
+      <header>
+        <slot name="header"></slot>
+      </header>
+      <main>
+        <slot></slot>
+      </main>
+      <footer>
+        <slot name="footer"></slot>
+      </footer>
+    </div>
+    父组件模版：
+    <app-layout>
+      <h1 slot="header">这里可能是一个页面标题</h1>
+      <p>主要内容的一个段落。</p>
+      <p>另一个主要段落。</p>
+      <p slot="footer">这里有一些联系信息</p>
+    </app-layout>
+    渲染结果为：
+    <div class="container">
+      <header>
+        <h1>这里可能是一个页面标题</h1>
+      </header>
+      <main>
+        <p>主要内容的一个段落。</p>
+        <p>另一个主要段落。</p>
+      </main>
+      <footer>
+        <p>这里有一些联系信息</p>
+      </footer>
+    </div>
+#### 动态组件
+is 特性。多个组件使用同一个挂载点，并且动态切换
+
+    var vm = new Vue({
+      el: '#example',
+      data: {
+        currentView: 'home'
+      },
+      components: {
+        home: { /* ... */ },
+        posts: { /* ... */ },
+        archive: { /* ... */ }
+      }
+    })
+    <component v-bind:is="currentView">
+      <!-- 组件在 vm.currentview 变化时改变！ -->
+    </component>    
+##### keep-alive
+动态切换组件的状态缓存保留
+    
+    <keep-alive>
+      <component :is="currentView">
+        <!-- 非活动组件将被缓存！ -->
+      </component>
+    </keep-alive>
+####编写可复用组件
+ 在编写组件时，记住是否要复用组件有好处。一次性组件跟其它组件紧密耦合没关系，但是可复用组件应当定义一个清晰的公开接口。
+ 
+ Vue 组件的 API 来自三部分 - props, events 和 slots ：   
+ * Props 允许外部环境传递数据给组件
+ * Events 允许组件触发外部环境的副作用
+ * Slots 允许外部环境将额外的内容组合在组件中。   
+使用 v-bind 和 v-on 的简写语法，模板的缩进清楚且简洁：  
+    
+    
+    <my-component
+      :foo="baz"
+      :bar="qux"
+      @event-a="doThis"
+      @event-b="doThat"
+    >
+      <img slot="icon" src="...">
+      <p slot="main-text">Hello!</p>
+    </my-component>
+
+
+-----
+
+好了，经过艰苦卓绝的探索实践过程，Vue官方教程的基础篇完成了。其实组件还有一些杂项，不过大多属于心得方面的吧，以后开发可以参考。
+经过这次Vue的探索之旅，真实良心官方教程啊。外国的坑爹教程，目不忍视。
+不管怎么样，基础里面还有一些涉及到进阶篇的内容。之后会补充上。
+好了，起飞！
+
+---------------
+    
     
     
     
