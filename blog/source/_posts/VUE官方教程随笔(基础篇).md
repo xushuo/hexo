@@ -1,10 +1,11 @@
 ---
-title: VUE官方教程随笔
+title: VUE官方教程随笔(基础篇)
 date: 2017-03-23 11:36:54
 tags:
     - vue.js
     - 教程
     - 前端
+    - 基础
 categories: 教程
 
 ---
